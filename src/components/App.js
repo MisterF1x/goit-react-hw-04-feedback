@@ -1,82 +1,52 @@
 import { Global } from '@emotion/react';
 import { Layout } from './Layout/Layout';
 import { Style } from './GlobalStyle';
-import { Component } from 'react';
-import { ContactForm } from './Form/Form';
-import { Contacts } from './Contacts/Contacts';
-import { nanoid } from 'nanoid';
-import { Title } from './Contacts/Contacts.styled';
-import { ContactsFilter } from './Filter/Filter';
+import { FeedbackOptions } from './FeedbackOptions/FeedbackOptions';
+import { Statistics } from './Statistics/Statistics';
+import { useState } from 'react';
+import { Notification } from './Notification/Notification';
 
-export class App extends Component {
-  state = {
-    contacts: [
-      { id: 'id-1', name: 'Rosie Simpson', number: '+380-32-459-12-56' },
-      { id: 'id-2', name: 'Hermione Kline', number: '+980-32-443-89-12' },
-      { id: 'id-3', name: 'Eden Clements', number: '180-32-645-17-79' },
-      { id: 'id-4', name: 'Annie Copeland', number: '380-32-227-91-26' },
-    ],
-    filter: '',
-  };
+export const App = () => {
+  const [good, setGood] = useState(0);
+  const [neutral, setNeutral] = useState(0);
+  const [bad, setBad] = useState(0);
 
-  addContact = ({ name, number }) => {
-    const contact = {
-      id: nanoid(),
-      name,
-      number,
-    };
-    const hasName = this.state.contacts.some(
-      contact => contact.name.toLowerCase() === name.toLowerCase()
-    );
-    if (hasName) return window.alert(`${name} is allready in contacts`);
-
-    this.setState(({ contacts }) => ({
-      contacts: [contact, ...contacts],
-    }));
+  const leaveFeedback = key => {
+    switch (key) {
+      case 'good':
+        setGood(pervState => pervState + 1);
+        break;
+      case 'neutral':
+        setNeutral(pervState => pervState + 1);
+        break;
+      case 'bad':
+        setBad(pervState => pervState + 1);
+        break;
+      default:
+        break;
+    }
   };
-
-  deleteContact = contactId => {
-    this.setState(({ contacts }) => ({
-      contacts: contacts.filter(contact => contact.id !== contactId),
-    }));
-  };
-  filteredContact = e => {
-    this.setState({ filter: e.currentTarget.value.trim() });
-  };
-  getVisibleContact = () => {
-    const { filter, contacts } = this.state;
-    const normalizedContacts = filter.toLowerCase();
-    return contacts.filter(contact =>
-      contact.name.toLowerCase().includes(normalizedContacts)
-    );
-  };
-  resetFormFilter = e => {
-    e.preventDefault();
-    this.setState({ filter: '' });
-  };
-  render() {
-    const hasContacts = Boolean(this.state.contacts.length);
-    const visibleContacts = this.getVisibleContact();
-    return (
-      <Layout>
-        <h1>Phonebook</h1>
-        <ContactForm onSubmit={this.addContact} />
-        {hasContacts && (
-          <>
-            <Title>Contacts</Title>
-            <ContactsFilter
-              value={this.state.filter}
-              onChange={this.filteredContact}
-              onClick={this.resetFormFilter}
-            />
-            <Contacts
-              contacts={visibleContacts}
-              onDeleteContact={this.deleteContact}
-            />
-          </>
-        )}
-        <Global styles={Style} />
-      </Layout>
-    );
-  }
-}
+  const countTotalFeedback = () => good + neutral + bad;
+  const countPositiveFeedbackPercentage = () =>
+    Math.round((good / countTotalFeedback()) * 100) || 0;
+  return (
+    <Layout>
+      <FeedbackOptions
+        options={Object.keys({ good, neutral, bad })}
+        onLeaveFeedback={leaveFeedback}
+      ></FeedbackOptions>
+      {!countTotalFeedback() ? (
+        <Notification message="There is no feedback" />
+      ) : (
+        <Statistics
+          good={good}
+          neutral={neutral}
+          bad={bad}
+          total={countTotalFeedback()}
+          positivePercentage={countPositiveFeedbackPercentage()}
+        ></Statistics>
+      )}
+      <Global styles={Style} />
+    </Layout>
+  );
+};
