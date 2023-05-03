@@ -1,8 +1,8 @@
 {
   "name": "react-feedback",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
-  "homepage": "https://misterf1x.github.io/goit-react-hw-02-feedback/",
+  "homepage": "https://misterf1x.github.io/goit-react-hw-04-feedback/",
   "dependencies": {
     "@emotion/react": "^11.10.6",
     "@emotion/styled": "^11.10.6",
